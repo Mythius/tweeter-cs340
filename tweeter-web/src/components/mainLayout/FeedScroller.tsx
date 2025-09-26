@@ -6,15 +6,14 @@ import {
 import { AuthToken, FakeData, Status, User } from "tweeter-shared";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { ToastActionsContext } from "../toaster/ToastContexts";
 import { useNavigate, useParams } from "react-router-dom";
-import { ToastType } from "../toaster/Toast";
 import StatusItem from "../statusItem/StatusItem";
+import { useMessageActions } from "../toaster/MessageHooks";
 
 export const PAGE_SIZE = 10;
 
 const FeedScroller = () => {
-  const { displayToast } = useContext(ToastActionsContext);
+  const { displayErrorMessage } = useMessageActions();
   const [items, setItems] = useState<Status[]>([]);
   const [hasMoreItems, setHasMoreItems] = useState(true);
   const [lastItem, setLastItem] = useState<Status | null>(null);
@@ -67,10 +66,8 @@ const FeedScroller = () => {
       setLastItem(() => newItems[newItems.length - 1]);
       addItems(newItems);
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to load feed items because of exception: ${error}`,
-        0
+      displayErrorMessage(
+        `Failed to load feed items because of exception: ${error}`
       );
     }
   };
@@ -100,11 +97,7 @@ const FeedScroller = () => {
         }
       }
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to get user because of exception: ${error}`,
-        0
-      );
+      displayErrorMessage(`Failed to get user because of exception: ${error}`);
     }
   };
 
@@ -135,7 +128,10 @@ const FeedScroller = () => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-          <StatusItem item={item} navigateToUser={navigateToUser}></StatusItem>
+            <StatusItem
+              item={item}
+              navigateToUser={navigateToUser}
+            ></StatusItem>
           </div>
         ))}
       </InfiniteScroll>
