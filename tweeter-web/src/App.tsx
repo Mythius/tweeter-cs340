@@ -114,7 +114,7 @@ const AuthenticatedRoutes = () => {
             <UserItemScroller
               key={`followees-${displayedUser!.alias}`}
               itemDescription="followees"
-              featureUrl="/folowees"
+              featureUrl="/followees"
               loadMoreFunction={loadMoreFollowees}
             />
           }
@@ -125,7 +125,7 @@ const AuthenticatedRoutes = () => {
             <UserItemScroller
               key={`followers-${displayedUser!.alias}`}
               itemDescription="followers"
-              featureUrl="/folowers"
+              featureUrl="/followers"
               loadMoreFunction={loadMoreFollowers}
             />
           }
