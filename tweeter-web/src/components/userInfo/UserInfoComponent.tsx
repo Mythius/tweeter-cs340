@@ -51,7 +51,6 @@ const UserInfo = () => {
           const [isFollowing, fCount, feCount] =
             await presenterRef.current!.initFollowData(
               authToken,
-              currentUser,
               displayedUser
             );
           setIsFollower(isFollowing);

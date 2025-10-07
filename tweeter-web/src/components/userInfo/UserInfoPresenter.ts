@@ -29,7 +29,6 @@ export class UserInfoPresenter {
 
   async initFollowData(
     authToken: AuthToken,
-    currentUser: User,
     displayedUser: User
   ): Promise<[boolean, number, number]> {
     const isFollowing = await this.service.getIsFollowerStatus(
@@ -47,32 +46,6 @@ export class UserInfoPresenter {
     );
     return [isFollowing, followerCount, foloweeCount];
   }
-
-  //   setNumbFollowees = async (authToken: AuthToken, displayedUser: User) => {
-  //     try {
-  //       this._followeeCount = await this.service.getFolloweeCount(
-  //         authToken,
-  //         displayedUser
-  //       );
-  //     } catch (error) {
-  //       this.view.displayErrorMessage(
-  //         `Failed to get followees count because of exception: ${error}`
-  //       );
-  //     }
-  //   };
-
-  //   async setNumbFollowers(authToken: AuthToken, displayedUser: User) {
-  //     try {
-  //       this._followerCount = await this.service.getFollowerCount(
-  //         authToken,
-  //         displayedUser
-  //       );
-  //     } catch (error) {
-  //       this.view.displayErrorMessage(
-  //         `Failed to get followers count because of exception: ${error}`
-  //       );
-  //     }
-  //   }
 
   async followDisplayedUser(authToken: AuthToken, displayedUser: User) {
     let messageId = this.view.displayInfoMessage(
@@ -121,10 +94,10 @@ export class UserInfoPresenter {
     return [_followerCount, _followeeCount];
   }
 
-  unfollow = async (
+  async unfollow(
     authToken: AuthToken,
     userToUnfollow: User
-  ): Promise<[_followerCount: number, _followeeCount: number]> => {
+  ): Promise<[_followerCount: number, _followeeCount: number]> {
     // Pause so we can see the unfollow message. Remove when connected to the server
     await new Promise((f) => setTimeout(f, 2000));
 
@@ -140,7 +113,7 @@ export class UserInfoPresenter {
     );
 
     return [_followerCount, _followeeCount];
-  };
+  }
 
   getIsFollowerStatus(authToken: AuthToken, user: User, selectedUser: User) {
     return this.service.getIsFollowerStatus(authToken, user, selectedUser);
