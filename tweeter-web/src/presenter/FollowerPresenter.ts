@@ -4,7 +4,7 @@ import { UserItemPresenter, UserItemView } from "./UserItemPresenter";
 
 export const PAGE_SIZE = 10;
 
-export class FolloweePresenter extends UserItemPresenter {
+export class FollowerPresenter extends UserItemPresenter {
   private service: FollowService;
 
   constructor(view: UserItemView) {
@@ -14,7 +14,7 @@ export class FolloweePresenter extends UserItemPresenter {
 
   loadMoreItems = async (authToken: AuthToken, userAlias: string) => {
     try {
-      const [newItems, hasMore] = await this.service.loadMoreFollowees(
+      const [newItems, hasMore] = await this.service.loadMoreFollowers(
         authToken,
         userAlias,
         PAGE_SIZE,
@@ -27,7 +27,7 @@ export class FolloweePresenter extends UserItemPresenter {
       this.view.addItems(newItems);
     } catch (error) {
       this.view.displayErrorMessage(
-        `Failed to load followees because of exception: ${error}`
+        `Failed to load followers because of exception: ${error}`
       );
     }
   };

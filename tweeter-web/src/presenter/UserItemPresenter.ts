@@ -28,6 +28,9 @@ export abstract class UserItemPresenter {
   protected set hasMoreItems(value: boolean) {
     this._hasMoreItems = value;
   }
+  public get hasMoreItems(){
+    return this._hasMoreItems;
+  }
   reset() {
     this._lastItem = null;
     this._hasMoreItems = true;
