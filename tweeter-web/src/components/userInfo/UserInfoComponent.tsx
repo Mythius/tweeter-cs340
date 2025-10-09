@@ -38,11 +38,6 @@ const UserInfo = () => {
     setDisplayedUser(currentUser!);
   }
 
-  function updateCounts(followees: number, followers: number) {
-    setFolloweeCount(followees);
-    setFollowerCount(followers);
-  }
-
   useEffect(() => {
     const loadData = async () => {
       if (authToken && currentUser && displayedUser) {

@@ -11,12 +11,13 @@ import Register from "./components/authentication/register/Register";
 import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
-import { AuthToken, User, FakeData, Status } from "tweeter-shared";
 import StatusItemScroller from "./components/mainLayout/StatusItemScroller";
 import { useUserInfo } from "./components/userInfo/UserInfoHooks";
 import { UserItemView } from "./presenter/UserItemPresenter";
 import { FolloweePresenter } from "./presenter/FolloweePresenter";
 import { FollowerPresenter } from "./presenter/FollowerPresenter";
+import AppPresenter from "./presenter/AppPresenter";
+import { useRef } from "react";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -39,48 +40,13 @@ const App = () => {
   );
 };
 
-const loadMoreFollowers = async (
-  authToken: AuthToken,
-  userAlias: string,
-  pageSize: number,
-  lastItem: User | null
-): Promise<[User[], boolean]> => {
-  // TODO: Replace with the result of calling server
-  return FakeData.instance.getPageOfUsers(lastItem, pageSize, userAlias);
-};
-
-const loadMoreFollowees = async (
-  authToken: AuthToken,
-  userAlias: string,
-  pageSize: number,
-  lastItem: User | null
-): Promise<[User[], boolean]> => {
-  // TODO: Replace with the result of calling server
-  return FakeData.instance.getPageOfUsers(lastItem, pageSize, userAlias);
-};
-
-const loadMoreFeedItems = async (
-  authToken: AuthToken,
-  userAlias: string,
-  pageSize: number,
-  lastItem: Status | null
-): Promise<[Status[], boolean]> => {
-  // TODO: Replace with the result of calling server
-  return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-};
-
-const loadMoreStoryItems = async (
-  authToken: AuthToken,
-  userAlias: string,
-  pageSize: number,
-  lastItem: Status | null
-): Promise<[Status[], boolean]> => {
-  // TODO: Replace with the result of calling server
-  return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-};
-
 const AuthenticatedRoutes = () => {
   const { displayedUser } = useUserInfo();
+
+  const appPresenter = useRef<AppPresenter | null>(null);
+  if (!appPresenter.current) {
+    appPresenter.current = new AppPresenter();
+  }
 
   return (
     <Routes>
@@ -96,7 +62,7 @@ const AuthenticatedRoutes = () => {
               key={`feed-${displayedUser!.alias}`}
               itemName="feed"
               url="/feed"
-              loadMoreFunction={loadMoreFeedItems}
+              loadMoreFunction={appPresenter.current!.loadMoreFeedItems}
             />
           }
         />
@@ -107,7 +73,7 @@ const AuthenticatedRoutes = () => {
               key={`story-${displayedUser!.alias}`}
               itemName="feed"
               url="/story"
-              loadMoreFunction={loadMoreStoryItems}
+              loadMoreFunction={appPresenter.current!.loadMoreStoryItems}
             />
           }
         />

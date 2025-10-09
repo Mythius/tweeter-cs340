@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { useRef } from "react";
+import NavigationPresenter from "../../presenter/NavigationPresenter";
 
 export const useUserNavigation = (featurePath: string) => {
   const navigate = useNavigate();
@@ -9,13 +10,21 @@ export const useUserNavigation = (featurePath: string) => {
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
 
+  const navigationPresenter = useRef<NavigationPresenter | null>(null);
+  if (!navigationPresenter.current) {
+    navigationPresenter.current = new NavigationPresenter();
+  }
+
   const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
     event.preventDefault();
 
     try {
       const alias = extractAlias(event.target.toString());
 
-      const toUser = await getUser(authToken!, alias);
+      const toUser = await navigationPresenter.current!.getUser(
+        authToken!,
+        alias
+      );
 
       if (toUser) {
         if (!toUser.equals(displayedUser!)) {
@@ -33,13 +42,5 @@ export const useUserNavigation = (featurePath: string) => {
     return value.substring(index);
   };
 
-  const getUser = async (
-    authToken: AuthToken,
-    alias: string
-  ): Promise<User | null> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.findUserByAlias(alias);
-  };
-
-  return { navigateToUser, getUser };
+  return { navigateToUser, getUser: navigationPresenter.current!.getUser };
 };
