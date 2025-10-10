@@ -45,4 +45,17 @@ export class FollowService {
     // TODO: Replace with the result of calling server
     return FakeData.instance.isFollower();
   }
+
+  async follow(
+    authToken: AuthToken,
+    userToUnfollow: User
+  ): Promise<void> {
+    await new Promise((f) => setTimeout(f, 2000));
+  }
+  async unfollow(
+    authToken: AuthToken,
+    userToUnfollow: User
+  ): Promise<void> {
+    await new Promise((f) => setTimeout(f, 2000));
+  }
 }

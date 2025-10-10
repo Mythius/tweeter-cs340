@@ -1,5 +1,5 @@
 import { AuthToken, User } from "tweeter-shared";
-import { FollowService } from "../../model.service/FollowService";
+import { FollowService } from "../model.service/FollowService";
 
 export interface UserInfoView {
   displayErrorMessage: (
@@ -65,7 +65,7 @@ export class UserInfoPresenter {
     userToFollow: User
   ): Promise<[_followerCount: number, _followeeCount: number]> {
     // Pause so we can see the follow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+    await this.service.follow(authToken, userToFollow);
 
     // TODO: Call the server
 
@@ -99,7 +99,7 @@ export class UserInfoPresenter {
     userToUnfollow: User
   ): Promise<[_followerCount: number, _followeeCount: number]> {
     // Pause so we can see the unfollow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+    await this.service.follow(authToken, userToUnfollow);
 
     // TODO: Call the server
 

@@ -18,6 +18,9 @@ import { FolloweePresenter } from "./presenter/FolloweePresenter";
 import { FollowerPresenter } from "./presenter/FollowerPresenter";
 import AppPresenter from "./presenter/AppPresenter";
 import { useRef } from "react";
+import { StatusItemView } from "./presenter/StatusItemPresenter";
+import { FeedItemPresenter } from "./presenter/FeedItemPresenter";
+import { StoryItemPresenter } from "./presenter/StoryItemPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -60,9 +63,10 @@ const AuthenticatedRoutes = () => {
           element={
             <StatusItemScroller
               key={`feed-${displayedUser!.alias}`}
-              itemName="feed"
               url="/feed"
-              loadMoreFunction={appPresenter.current!.loadMoreFeedItems}
+              presenterFactory={(view: StatusItemView) =>
+                new FeedItemPresenter(view)
+              }
             />
           }
         />
@@ -71,9 +75,10 @@ const AuthenticatedRoutes = () => {
           element={
             <StatusItemScroller
               key={`story-${displayedUser!.alias}`}
-              itemName="feed"
               url="/story"
-              loadMoreFunction={appPresenter.current!.loadMoreStoryItems}
+              presenterFactory={(view: StatusItemView) =>
+                new StoryItemPresenter(view)
+              }
             />
           }
         />

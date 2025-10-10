@@ -5,6 +5,7 @@ import Image from "react-bootstrap/Image";
 import { AuthToken } from "tweeter-shared";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
+import { UserService } from "../../model.service/UserService";
 
 const AppNavbar = () => {
   const location = useLocation();
@@ -17,8 +18,10 @@ const AppNavbar = () => {
   const logOut = async () => {
     const loggingOutToastId = displayInfoMessage("Logging Out...", 0);
 
+    const userService = new UserService();
+
     try {
-      await logout(authToken!);
+      await userService.logout(authToken!);
 
       deleteMessage(loggingOutToastId);
       clearUserInfo();
@@ -28,11 +31,6 @@ const AppNavbar = () => {
         `Failed to log user out because of exception: ${error}`
       );
     }
-  };
-
-  const logout = async (authToken: AuthToken): Promise<void> => {
-    // Pause so we can see the logging out message. Delete when the call to the server is implemented.
-    await new Promise((res) => setTimeout(res, 1000));
   };
 
   return (

@@ -6,7 +6,7 @@ import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import AuthenticationFields from "../AuthenticationFields/AuthenticationFields";
 import { useMessageActions } from "../../toaster/MessageHooks";
 import { useUserInfoActions } from "../../userInfo/UserInfoHooks";
-import LoginPresenter from "../../../presenter/LoginPresenter";
+import LoginPresenter, { LoginView } from "../../../presenter/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -22,9 +22,16 @@ const Login = (props: Props) => {
   const { updateUserInfo } = useUserInfoActions();
   const { displayErrorMessage } = useMessageActions();
 
+  const view: LoginView = {
+    navigate,
+    updateUserInfo,
+    displayErrorMessage,
+    setIsLoading,
+  };
+
   const loginPresenter = useRef<LoginPresenter | null>(null);
   if (!loginPresenter.current) {
-    loginPresenter.current = new LoginPresenter();
+    loginPresenter.current = new LoginPresenter(view);
   }
 
   const checkSubmitButtonStatus = (): boolean => {
@@ -37,29 +44,13 @@ const Login = (props: Props) => {
     }
   };
 
-  const doLogin = async () => {
-    try {
-      setIsLoading(true);
-
-      const [user, authToken] = await loginPresenter.current!.login(
-        alias,
-        password
-      );
-
-      updateUserInfo(user, user, authToken, rememberMe);
-
-      if (!!props.originalUrl) {
-        navigate(props.originalUrl);
-      } else {
-        navigate(`/feed/${user.alias}`);
-      }
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
+  const doLogin = () => {
+    loginPresenter.current!.doLogin(
+      alias,
+      password,
+      rememberMe,
+      props.originalUrl
+    );
   };
 
   const inputFieldFactory = () => {
