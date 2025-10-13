@@ -1,12 +1,9 @@
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface LoginView {
+export interface LoginView extends View {
   setIsLoading: (loading: boolean) => unknown;
-  displayErrorMessage: (
-    message: string,
-    bootstrapClasses?: string | undefined
-  ) => string;
   navigate: (url: string) => unknown;
   updateUserInfo: (
     currentUser: User,
@@ -16,11 +13,10 @@ export interface LoginView {
   ) => void;
 }
 
-export default class LoginPresenter {
+export default class LoginPresenter extends Presenter<LoginView> {
   private userService: UserService = new UserService();
-  private view: LoginView;
   constructor(v: LoginView) {
-    this.view = v;
+    super(v);
   }
   async doLogin(
     alias: string,
@@ -28,7 +24,7 @@ export default class LoginPresenter {
     rememberMe: boolean,
     originalUrl: string | undefined
   ) {
-    try {
+    await this.doFailureReportingOperation(async () => {
       this.view.setIsLoading(true);
 
       const [user, authToken] = await this.userService.login(alias, password);
@@ -40,12 +36,7 @@ export default class LoginPresenter {
       } else {
         this.view.navigate(`/feed/${user.alias}`);
       }
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to log user in because of exception: ${error}`
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+    }, "log user in");
+    this.view.setIsLoading(false);
   }
 }

@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
 import { useRef } from "react";
-import NavigationPresenter from "../../presenter/NavigationPresenter";
+import NavigationPresenter, {
+  NavigationView,
+} from "../../presenter/NavigationPresenter";
 
 export const useUserNavigation = (featurePath: string) => {
   const navigate = useNavigate();
@@ -10,37 +12,26 @@ export const useUserNavigation = (featurePath: string) => {
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
 
+  const view: NavigationView = {
+    setDisplayedUser,
+    displayErrorMessage,
+    navigate,
+    featurePath,
+  };
+
   const navigationPresenter = useRef<NavigationPresenter | null>(null);
   if (!navigationPresenter.current) {
-    navigationPresenter.current = new NavigationPresenter();
+    navigationPresenter.current = new NavigationPresenter(view);
   }
 
-  const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
+  async function navigateToUser(event: React.MouseEvent): Promise<void> {
     event.preventDefault();
-
-    try {
-      const alias = extractAlias(event.target.toString());
-
-      const toUser = await navigationPresenter.current!.getUser(
-        authToken!,
-        alias
-      );
-
-      if (toUser) {
-        if (!toUser.equals(displayedUser!)) {
-          setDisplayedUser(toUser);
-          navigate(`${featurePath}/${toUser.alias}`);
-        }
-      }
-    } catch (error) {
-      displayErrorMessage(`Failed to get user because of exception: ${error}`);
-    }
-  };
-
-  const extractAlias = (value: string): string => {
-    const index = value.indexOf("@");
-    return value.substring(index);
-  };
+    await navigationPresenter.current!.navigateToUser(
+      event.target!.toString(),
+      authToken!,
+      displayedUser!
+    );
+  }
 
   return { navigateToUser, getUser: navigationPresenter.current!.getUser };
 };
