@@ -15,9 +15,6 @@ export interface LoginView extends View {
 
 export default class LoginPresenter extends Presenter<LoginView> {
   private userService: UserService = new UserService();
-  constructor(v: LoginView) {
-    super(v);
-  }
   async doLogin(
     alias: string,
     password: string,

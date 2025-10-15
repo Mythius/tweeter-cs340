@@ -2,8 +2,9 @@ import { ChangeEvent } from "react";
 import { UserService } from "../model.service/UserService";
 import { Buffer } from "buffer";
 import { User, AuthToken } from "tweeter-shared";
+import { Presenter, View } from "./Presenter";
 
-export interface RegisterView {
+export interface RegisterView extends View {
   setImageUrl: (url: string) => unknown;
   setImageBytes: (bytes: Uint8Array) => unknown;
   setImageFileExtension: (fe: string) => unknown;
@@ -14,20 +15,12 @@ export interface RegisterView {
     authToken: AuthToken,
     remember: boolean
   ) => void;
-  displayErrorMessage: (
-    message: string,
-    bootstrapClasses?: string | undefined
-  ) => string;
   navigate: (url: string) => unknown;
 }
 
-export default class RegisterPresenter {
+export default class RegisterPresenter extends Presenter<RegisterView> {
   private userService: UserService = new UserService();
   public register = this.userService.register;
-  private view: RegisterView;
-  constructor(v: RegisterView) {
-    this.view = v;
-  }
   handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     this.handleImageFile(file);
@@ -78,7 +71,7 @@ export default class RegisterPresenter {
     imageFileExtension: string,
     rememberMe: boolean
   ) => {
-    try {
+    this.doFailureReportingOperation(async () => {
       this.view.setIsLoading(true);
 
       const [user, authToken] = await this.userService.register(
@@ -92,12 +85,6 @@ export default class RegisterPresenter {
 
       this.view.updateUserInfo(user, user, authToken, rememberMe);
       this.view.navigate(`/feed/${user.alias}`);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+    }, "register user");
   };
 }
