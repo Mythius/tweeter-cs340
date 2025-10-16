@@ -1,36 +1,54 @@
-import { Status } from "tweeter-shared";
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { Status, User } from "tweeter-shared";
 import { useParams } from "react-router-dom";
-import StatusItem from "../statusItem/StatusItem";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
+import {
+  PagedItemPresenter,
+  PagedItemView,
+} from "../../presenter/PagedItemPresenter";
+import { StatusService } from "../../model.service/StatusService";
+import { FollowService } from "../../model.service/FollowService";
 import { useUserNavigation } from "../appNavbar/UserNavigation";
-import { StatusItemPresenter } from "../../presenter/StatusItemPresenter";
-import { PagedItemView } from "../../presenter/PagedItemPresenter";
 
-interface Props {
+type Item = User | Status;
+type Service = StatusService | FollowService;
+
+interface Props<ItemType extends Item, S extends Service> {
   url: string;
-  presenterFactory: (listener: PagedItemView<Status>) => StatusItemPresenter;
-
+  presenterFactory: (
+    listener: PagedItemView<ItemType>
+  ) => PagedItemPresenter<ItemType, S>;
+  componentFactory: (
+    item: ItemType,
+    url: string,
+    navigate: (event: any) => Promise<void>
+  ) => JSX.Element;
 }
 
-const StatusItemScroller: React.FC<Props> = ({ url, presenterFactory }) => {
+const ItemScroller = <ItemType extends Item, S extends Service>({
+  url,
+  presenterFactory,
+  componentFactory,
+}: Props<ItemType, S>) => {
   const { displayErrorMessage } = useMessageActions();
-  const [items, setItems] = useState<Status[]>([]);
+  const [items, setItems] = useState<ItemType[]>([]);
+
   const { navigateToUser } = useUserNavigation(url);
 
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
   const { displayedUser: displayedUserAliasParam } = useParams();
 
-  const listener: PagedItemView<Status> = {
-    addItems: (newItems: Status[]) =>
+  const listener: PagedItemView<ItemType> = {
+    addItems: (newItems: ItemType[]) =>
       setItems((previousItems) => [...previousItems, ...newItems]),
-    displayErrorMessage,
+    displayErrorMessage: displayErrorMessage,
   };
 
-  const presenterRef = useRef<StatusItemPresenter | null>(null);
+  const presenterRef = useRef<PagedItemPresenter<ItemType, S> | null>(null);
   if (!presenterRef.current) {
     presenterRef.current = presenterFactory(listener);
   }
@@ -84,14 +102,12 @@ const StatusItemScroller: React.FC<Props> = ({ url, presenterFactory }) => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <StatusItem
-              item={item}
-              navigateToUser={navigateToUser}
-            ></StatusItem>
+            {componentFactory(item, url, navigateToUser)}
           </div>
         ))}
       </InfiniteScroll>
     </div>
   );
 };
-export default StatusItemScroller;
+
+export default ItemScroller;

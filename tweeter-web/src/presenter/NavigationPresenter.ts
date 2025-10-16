@@ -19,7 +19,7 @@ export default class NavigationPresenter extends Presenter<NavigationView> {
     authToken: AuthToken,
     displayedUser: User
   ): Promise<void> {
-    this.doFailureReportingOperation(async () => {
+    await this.doFailureReportingOperation(async () => {
       const alias = this.extractAlias(aliasdata);
 
       const toUser = await this.userService.getUser(authToken!, alias);

@@ -29,6 +29,6 @@ export abstract class Presenter<V extends View> {
     }
   };
   get view(): V {
-    return this.view;
+    return this._view;
   }
 }

@@ -3,22 +3,17 @@ import { UserService } from "../model.service/UserService";
 import { Buffer } from "buffer";
 import { User, AuthToken } from "tweeter-shared";
 import { Presenter, View } from "./Presenter";
+import AuthenticationPresenter, {
+  AuthenticationView,
+} from "./AuthenticationPresenter";
 
-export interface RegisterView extends View {
+export interface RegisterView extends AuthenticationView {
   setImageUrl: (url: string) => unknown;
   setImageBytes: (bytes: Uint8Array) => unknown;
   setImageFileExtension: (fe: string) => unknown;
-  setIsLoading: (loading: boolean) => unknown;
-  updateUserInfo: (
-    currentUser: User,
-    displayedUser: User | null,
-    authToken: AuthToken,
-    remember: boolean
-  ) => void;
-  navigate: (url: string) => unknown;
 }
 
-export default class RegisterPresenter extends Presenter<RegisterView> {
+export default class RegisterPresenter extends AuthenticationPresenter<RegisterView> {
   private userService: UserService = new UserService();
   public register = this.userService.register;
   handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -71,20 +66,23 @@ export default class RegisterPresenter extends Presenter<RegisterView> {
     imageFileExtension: string,
     rememberMe: boolean
   ) => {
-    this.doFailureReportingOperation(async () => {
-      this.view.setIsLoading(true);
-
-      const [user, authToken] = await this.userService.register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        imageBytes,
-        imageFileExtension
-      );
-
-      this.view.updateUserInfo(user, user, authToken, rememberMe);
-      this.view.navigate(`/feed/${user.alias}`);
-    }, "register user");
+    this.doAuthenticationOperation(
+      async () => {
+        return await this.userService.register(
+          firstName,
+          lastName,
+          alias,
+          password,
+          imageBytes,
+          imageFileExtension
+        );
+      },
+      rememberMe,
+      undefined
+    );
   };
+
+  doNavigate(user: User, originalUrl: string | undefined): void {
+    this.view.navigate(`/feed/${user.alias}`);
+  }
 }

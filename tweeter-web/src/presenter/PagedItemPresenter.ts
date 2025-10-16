@@ -40,7 +40,7 @@ export abstract class PagedItemPresenter<
     this._hasMoreItems = true;
   }
   async loadMoreItems(authToken: AuthToken, userAlias: string) {
-    this.doFailureReportingOperation(async () => {
+    await this.doFailureReportingOperation(async () => {
       const [newItems, hasMore] = await this.getMoreItems(authToken, userAlias);
 
       this.hasMoreItems = hasMore;

@@ -31,72 +31,70 @@ export class UserInfoPresenter extends Presenter<MessageView> {
     return [isFollowing, followerCount, foloweeCount];
   }
 
-  async followDisplayedUser(authToken: AuthToken, displayedUser: User) {
-    let messageId = this.view.displayInfoMessage(
-      `Following ${displayedUser.name}...`,
-      0
-    );
-    const [_followerCount, _followeeCount] = await this.follow(
+  async doFollowOperation(
+    authToken: AuthToken,
+    displayedUser: User,
+    follow: boolean
+  ): Promise<[_followerCount: number, _followeeCount: number]> {
+    if (follow) {
+      await this.service.follow(authToken, displayedUser);
+    } else {
+      await this.service.unfollow(authToken, displayedUser);
+    }
+    const followerCount = await this.service.getFollowerCount(
       authToken,
       displayedUser
     );
+    const foloweeCount = await this.service.getFolloweeCount(
+      authToken,
+      displayedUser
+    );
+    return [followerCount, foloweeCount];
+  }
+
+  async doFollowDisplayedUser(
+    authToken: AuthToken,
+    displayedUser: User,
+    follow: boolean
+  ) {
+    let messageId = this.view.displayInfoMessage(
+      `${follow ? "Following" : "Unfollowing"} ${displayedUser.name}...`,
+      0
+    );
+    if (follow) {
+      await this.follow(authToken, displayedUser);
+    } else {
+      await this.unfollow(authToken, displayedUser);
+    }
+    const [_followerCount, _followeeCount] = await this.doFollowOperation(
+      authToken,
+      displayedUser,
+      follow
+    );
     this.view.deleteMessage(messageId);
     return [_followerCount, _followeeCount];
+  }
+
+  async followDisplayedUser(authToken: AuthToken, displayedUser: User) {
+    return await this.doFollowDisplayedUser(authToken, displayedUser, true);
   }
 
   async follow(
     authToken: AuthToken,
     userToFollow: User
   ): Promise<[_followerCount: number, _followeeCount: number]> {
-    // Pause so we can see the follow message. Remove when connected to the server
-    await this.service.follow(authToken, userToFollow);
-
-    // TODO: Call the server
-
-    const _followerCount = await this.service.getFollowerCount(
-      authToken,
-      userToFollow
-    );
-    const _followeeCount = await this.service.getFolloweeCount(
-      authToken,
-      userToFollow
-    );
-
-    return [_followerCount, _followeeCount];
+    return await this.doFollowOperation(authToken, userToFollow, true);
   }
 
   async unfollowDisplayedUser(authToken: AuthToken, displayedUser: User) {
-    let messageId = this.view.displayInfoMessage(
-      `Unfollowing ${displayedUser.name}...`,
-      0
-    );
-    const [_followerCount, _followeeCount] = await this.unfollow(
-      authToken,
-      displayedUser
-    );
-    this.view.deleteMessage(messageId);
-    return [_followerCount, _followeeCount];
+    return await this.doFollowDisplayedUser(authToken, displayedUser, false);
   }
 
   async unfollow(
     authToken: AuthToken,
     userToUnfollow: User
   ): Promise<[_followerCount: number, _followeeCount: number]> {
-    // Pause so we can see the unfollow message. Remove when connected to the server
-    await this.service.follow(authToken, userToUnfollow);
-
-    // TODO: Call the server
-
-    const _followerCount = await this.service.getFollowerCount(
-      authToken,
-      userToUnfollow
-    );
-    const _followeeCount = await this.service.getFolloweeCount(
-      authToken,
-      userToUnfollow
-    );
-
-    return [_followerCount, _followeeCount];
+    return await this.doFollowOperation(authToken, userToUnfollow, false);
   }
 
   getIsFollowerStatus(authToken: AuthToken, user: User, selectedUser: User) {
