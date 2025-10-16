@@ -15,7 +15,7 @@ export interface MessageView extends View {
 }
 
 export abstract class Presenter<V extends View> {
-  protected constructor(private _view: V) {}
+  public constructor(private _view: V) {}
   protected doFailureReportingOperation = async (
     operation: () => Promise<void>,
     operationDescription: string
