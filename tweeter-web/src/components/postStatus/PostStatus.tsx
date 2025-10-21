@@ -1,11 +1,18 @@
 import "./PostStatus.css";
 import { useRef, useState } from "react";
-import { AuthToken, Status } from "tweeter-shared";
+import { AuthToken, Status, User } from "tweeter-shared";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo } from "../userInfo/UserInfoHooks";
-import { PostStatusPresenter } from "../../presenter/PostStatusPresenter";
+import {
+  PostStatusPresenter,
+  PostStatusView,
+} from "../../presenter/PostStatusPresenter";
 
-const PostStatus = () => {
+interface Props{
+  presenter?: PostStatusPresenter;
+}
+
+const PostStatus = (props?: Props) => {
   const { deleteMessage, displayErrorMessage, displayInfoMessage } =
     useMessageActions();
 
@@ -13,34 +20,23 @@ const PostStatus = () => {
   const [post, setPost] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const postStatusView: PostStatusView = {
+    displayErrorMessage,
+    setIsLoading: (v: boolean) => setIsLoading(v),
+    setPost: (s: string) => setPost(s),
+    displayInfoMessage,
+    setDisplayedUser: (u: User) => {},
+    deleteMessage,
+  };
+
   const presenterRef = useRef<PostStatusPresenter | null>(null);
   if (!presenterRef.current) {
-    presenterRef.current = new PostStatusPresenter();
+    presenterRef.current = props?.presenter ?? new PostStatusPresenter(postStatusView);
   }
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
-
-    var postingStatusToastId = "";
-
-    try {
-      setIsLoading(true);
-      postingStatusToastId = displayInfoMessage("Posting status...", 0);
-
-      const status = new Status(post, currentUser!, Date.now());
-
-      await presenterRef.current!.postStatus(authToken!, status);
-
-      setPost("");
-      displayInfoMessage("Status posted!", 2000);
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to post the status because of exception: ${error}`
-      );
-    } finally {
-      deleteMessage(postingStatusToastId);
-      setIsLoading(false);
-    }
+    presenterRef.current!.submitPost(authToken!,post,currentUser!);
   };
 
   const clearPost = (event: React.MouseEvent) => {
@@ -58,6 +54,7 @@ const PostStatus = () => {
         <textarea
           className="form-control"
           id="postStatusTextArea"
+          aria-label="posttext"
           rows={10}
           placeholder="What's on your mind?"
           value={post}
@@ -71,6 +68,7 @@ const PostStatus = () => {
           id="postStatusButton"
           className="btn btn-md btn-primary me-1"
           type="button"
+          aria-label="poststatus"
           disabled={checkButtonStatus()}
           style={{ width: "8em" }}
           onClick={submitPost}
@@ -88,6 +86,7 @@ const PostStatus = () => {
         <button
           id="clearStatusButton"
           className="btn btn-md btn-secondary"
+          aria-label="clear"
           type="button"
           disabled={checkButtonStatus()}
           onClick={clearPost}

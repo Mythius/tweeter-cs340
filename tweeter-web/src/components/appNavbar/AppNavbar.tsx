@@ -2,10 +2,13 @@ import "./AppNavbar.css";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Image from "react-bootstrap/Image";
-import { AuthToken } from "tweeter-shared";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
-import { UserService } from "../../model.service/UserService";
+import {
+  AppNavbarPresenter,
+  AppNavbarView,
+} from "../../presenter/AppNavbarPresenter";
+import { useRef } from "react";
 
 const AppNavbar = () => {
   const location = useLocation();
@@ -15,23 +18,21 @@ const AppNavbar = () => {
   const { displayErrorMessage, displayInfoMessage, deleteMessage } =
     useMessageActions();
 
-  const logOut = async () => {
-    const loggingOutToastId = displayInfoMessage("Logging Out...", 0);
-
-    const userService = new UserService();
-
-    try {
-      await userService.logout(authToken!);
-
-      deleteMessage(loggingOutToastId);
-      clearUserInfo();
+  const view: AppNavbarView = {
+    clearUserInfo,
+    displayErrorMessage,
+    setDisplayedUser: () => {},
+    deleteMessage,
+    displayInfoMessage,
+    navigateToLogin: () => {
       navigate("/login");
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to log user out because of exception: ${error}`
-      );
-    }
+    },
   };
+
+  const presenter = useRef<AppNavbarPresenter | null>(null);
+  if (!presenter.current) {
+    presenter.current = new AppNavbarPresenter(view);
+  }
 
   return (
     <Navbar
@@ -110,7 +111,9 @@ const AppNavbar = () => {
             <Nav.Item>
               <NavLink
                 id="logout"
-                onClick={logOut}
+                onClick={() => {
+                  presenter.current!.logOut(authToken!);
+                }}
                 to={location.pathname}
                 className={({ isActive }) =>
                   isActive ? "nav-link active" : "nav-link"
