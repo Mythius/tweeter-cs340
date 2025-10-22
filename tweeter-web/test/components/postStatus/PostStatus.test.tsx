@@ -10,10 +10,9 @@ import * as UserInfoHooks from "../../../src/components/userInfo/UserInfoHooks";
 import * as MessageHooks from "../../../src/components/toaster/MessageHooks";
 
 describe("Login Component", () => {
+  const mockUser = new User("Test", "User", "testuser", "imageUrl");
+  const mockAuthToken = new AuthToken("token", Date.now());
   beforeAll(() => {
-    const mockUser = new User("Test", "User", "testuser", "imageUrl");
-    const mockAuthToken = new AuthToken("token", Date.now());
-
     jest.spyOn(UserInfoHooks, "useUserInfo").mockReturnValue({
       currentUser: mockUser,
       displayedUser: mockUser,
@@ -62,7 +61,9 @@ describe("Login Component", () => {
     await user.type(textfield, postText);
     await user.click(postStatusButton);
 
-    verify(mockPresenter.submitPost(anything(), postText, anything())).once();
+    verify(
+      mockPresenter.submitPost(mockAuthToken, postText, mockUser)
+    ).once();
   });
 });
 
