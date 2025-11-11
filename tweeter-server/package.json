@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run clean && tsc",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "update-layer": "mkdir -p layer/nodejs/node_modules && cp -r ../tweeter-shared/dist layer/nodejs/node_modules/tweeter-shared",
+    "deploy": "npm run build && npm run update-layer && sam build && echo 'y' | sam deploy"
   },
   "keywords": [],
   "author": "",

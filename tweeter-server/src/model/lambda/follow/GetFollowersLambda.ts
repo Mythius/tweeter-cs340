@@ -2,10 +2,10 @@ import { PagedUserItemRequest, PagedUserItemResponse } from "tweeter-shared";
 import { FollowService } from "../../service/follow/FollowService";
 import { BaseLambda } from "../BaseLambda";
 
-class GetFolloweesLambda extends BaseLambda<PagedUserItemRequest, PagedUserItemResponse> {
+class GetFollowersLambda extends BaseLambda<PagedUserItemRequest, PagedUserItemResponse> {
     protected async execute(request: PagedUserItemRequest): Promise<PagedUserItemResponse> {
         const followService = new FollowService();
-        const [items, hasMore] = await followService.loadMoreFollowees(
+        const [items, hasMore] = await followService.loadMoreFollowers(
             request.token,
             request.userAlias,
             request.pageSize,
@@ -21,5 +21,5 @@ class GetFolloweesLambda extends BaseLambda<PagedUserItemRequest, PagedUserItemR
 }
 
 export const handler = async (request: PagedUserItemRequest): Promise<PagedUserItemResponse> => {
-    return new GetFolloweesLambda().handleRequest(request);
+    return new GetFollowersLambda().handleRequest(request);
 };
