@@ -23,3 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 /dist
+/tweeter-server/node_modules
+/tweeter-server/dist
+/tweeter-server/nodejs
+*.zip
+/tweeter-server/.aws-sam
+/tweeter-server/layer/nodejs
