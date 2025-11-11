@@ -107,6 +107,7 @@ Resources:
 
           /follow/getfollowees:
             post:
+              description: "Retrieves a paginated list of users that a specified user is following"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -121,6 +122,7 @@ Resources:
 
           /follow/getfollowers:
             post:
+              description: "Retrieves a paginated list of users that are following a specified user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -134,6 +136,7 @@ Resources:
 
           /follow/getfollowercount:
             post:
+              description: "Retrieves the total count of followers for a specified user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -147,6 +150,7 @@ Resources:
 
           /follow/getfolloweecount:
             post:
+              description: "Retrieves the total count of users that a specified user is following"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -160,6 +164,7 @@ Resources:
 
           /follow/getisfollowerstatus:
             post:
+              description: "Checks whether a user is following another specified user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -173,6 +178,7 @@ Resources:
 
           /follow/follow:
             post:
+              description: "Creates a follow relationship where the authenticated user follows another user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -186,6 +192,7 @@ Resources:
 
           /follow/unfollow:
             post:
+              description: "Removes a follow relationship where the authenticated user unfollows another user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -199,6 +206,7 @@ Resources:
 
           /user/getuser:
             post:
+              description: "Retrieves user profile information for a specified user alias"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -212,6 +220,7 @@ Resources:
 
           /user/register:
             post:
+              description: "Registers a new user account with profile information and credentials"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -225,6 +234,7 @@ Resources:
 
           /user/login:
             post:
+              description: "Authenticates a user with their alias and password, returning a session token"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -238,6 +248,7 @@ Resources:
 
           /user/logout:
             post:
+              description: "Logs out a user by invalidating their session token"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -251,6 +262,7 @@ Resources:
 
           /status/getfeed:
             post:
+              description: "Retrieves a paginated feed of status posts from users that the authenticated user follows"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -264,6 +276,7 @@ Resources:
 
           /status/getstory:
             post:
+              description: "Retrieves a paginated list of status posts created by a specified user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -277,6 +290,7 @@ Resources:
 
           /post/poststatus:
             post:
+              description: "Creates and publishes a new status post for the authenticated user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:

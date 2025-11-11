@@ -4,6 +4,13 @@ import { UserService } from "../../service/user/UserService";
 
 export const handler = async (request: LoginRequest): Promise<AuthenticateResponse | TweeterResponse> => {
     try {
+        if (!request.alias || request.alias.trim() === "") {
+            throw new Error("[bad-request] Username cannot be empty");
+        }
+        if (!request.password || request.password.trim() === "") {
+            throw new Error("[bad-request] Password cannot be empty");
+        }
+
         const userService = new UserService();
         const [user, token] = await userService.login(request.alias, request.password);
         return {
