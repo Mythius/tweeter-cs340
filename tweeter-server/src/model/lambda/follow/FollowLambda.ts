@@ -7,7 +7,7 @@ class FollowLambda extends BaseLambda<FollowRequest, TweeterResponse> {
         const followService = new FollowService();
         await followService.follow(
             request.token,
-            User.fromDto(request.userToFollow)!
+            User.fromDto(request.user)!
         );
         return {
             success: true,

@@ -7,7 +7,7 @@ class UnfollowLambda extends BaseLambda<FollowRequest, TweeterResponse> {
         const followService = new FollowService();
         await followService.unfollow(
             request.token,
-            User.fromDto(request.userToFollow)!
+            User.fromDto(request.user)!
         );
         return {
             success: true,
