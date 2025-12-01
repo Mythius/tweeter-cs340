@@ -1,9 +1,0 @@
-Tables:
-- Follow
-- Session
-- Status
-- User
-- Feed
-
-Strategy: 
-Append Every Status Posted to Every Users Feed Table
