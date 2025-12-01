@@ -26,7 +26,7 @@ export default abstract class AuthenticationPresenter<
       this.view.updateUserInfo(user, user, authToken, rememberMe);
       this.doNavigate(user, originalUrl);
     }, "authenticate user");
-    this.view.setIsLoading(true);
+    this.view.setIsLoading(false);
   }
   abstract doNavigate(user: User, originalUrl: string | undefined): void;
 }

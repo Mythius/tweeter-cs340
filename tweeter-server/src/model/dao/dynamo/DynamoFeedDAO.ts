@@ -20,7 +20,7 @@ export class DynamoFeedDAO implements IFeedDAO {
       TableName: this.tableName,
       Item: {
         receiver_alias: receiverAlias,
-        timestamp: -status.timestamp, // Negative for descending order
+        timestamp: -status.timestamp, 
         post: status.post,
         author_alias: status.user.alias,
         author_firstName: status.user.firstName,
@@ -53,7 +53,7 @@ export class DynamoFeedDAO implements IFeedDAO {
     if (lastTimestamp) {
       params.ExclusiveStartKey = {
         receiver_alias: receiverAlias,
-        timestamp: -lastTimestamp, // Remember: stored as negative
+        timestamp: -lastTimestamp, 
       };
     }
 
@@ -85,7 +85,7 @@ export class DynamoFeedDAO implements IFeedDAO {
       TableName: this.tableName,
       Key: {
         receiver_alias: receiverAlias,
-        timestamp: -timestamp, // Stored as negative
+        timestamp: -timestamp, 
       },
     };
 
