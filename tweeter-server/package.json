@@ -7,16 +7,28 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
-    "update-layer": "mkdir -p layer/nodejs/node_modules && cp -r ../tweeter-shared/dist layer/nodejs/node_modules/tweeter-shared",
-    "deploy": "npm run build && npm run update-layer && sam build && echo 'y' | sam deploy"
+    "update-layer": "mkdir -p layer/nodejs/node_modules && cp -r ../tweeter-shared/dist layer/nodejs/node_modules/tweeter-shared && cp -r node_modules/* layer/nodejs/node_modules/",
+    "deploy": "npm run build && npm run update-layer && sam build && echo 'y' | sam deploy",
+    "seed": "ts-node scripts/seed-database.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "tweeter-shared": "file:../tweeter-shared",
+    "@aws-sdk/client-dynamodb": "^3.939.0",
+    "@aws-sdk/client-s3": "^3.939.0",
+    "@aws-sdk/client-sqs": "^3.939.0",
+    "@aws-sdk/lib-dynamodb": "^3.939.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "date-fns": "^3.3.1",
+    "tweeter-shared": "file:../tweeter-shared",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
