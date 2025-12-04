@@ -150,37 +150,61 @@ export class DynamoFollowDAO implements IFollowDAO {
   }
 
   async getFollowerCount(followeeAlias: string): Promise<number> {
-    const params = {
-      TableName: this.tableName,
-      IndexName: this.indexName,
-      KeyConditionExpression: "followee_alias = :followee",
-      ExpressionAttributeValues: {
-        ":followee": followeeAlias,
-      },
-      Select: "COUNT" as const,
-    };
+    let count = 0;
+    let lastEvaluatedKey: any = undefined;
 
     try {
-      const result = await this.docClient.send(new QueryCommand(params));
-      return result.Count || 0;
+      do {
+        const params: any = {
+          TableName: this.tableName,
+          IndexName: this.indexName,
+          KeyConditionExpression: "followee_alias = :followee",
+          ExpressionAttributeValues: {
+            ":followee": followeeAlias,
+          },
+          Select: "COUNT" as const,
+        };
+
+        if (lastEvaluatedKey) {
+          params.ExclusiveStartKey = lastEvaluatedKey;
+        }
+
+        const result = await this.docClient.send(new QueryCommand(params));
+        count += result.Count || 0;
+        lastEvaluatedKey = result.LastEvaluatedKey;
+      } while (lastEvaluatedKey);
+
+      return count;
     } catch (error) {
       throw new Error(`[internal-server-error] Failed to get follower count: ${error}`);
     }
   }
 
   async getFolloweeCount(followerAlias: string): Promise<number> {
-    const params = {
-      TableName: this.tableName,
-      KeyConditionExpression: "follower_alias = :follower",
-      ExpressionAttributeValues: {
-        ":follower": followerAlias,
-      },
-      Select: "COUNT" as const,
-    };
+    let count = 0;
+    let lastEvaluatedKey: any = undefined;
 
     try {
-      const result = await this.docClient.send(new QueryCommand(params));
-      return result.Count || 0;
+      do {
+        const params: any = {
+          TableName: this.tableName,
+          KeyConditionExpression: "follower_alias = :follower",
+          ExpressionAttributeValues: {
+            ":follower": followerAlias,
+          },
+          Select: "COUNT" as const,
+        };
+
+        if (lastEvaluatedKey) {
+          params.ExclusiveStartKey = lastEvaluatedKey;
+        }
+
+        const result = await this.docClient.send(new QueryCommand(params));
+        count += result.Count || 0;
+        lastEvaluatedKey = result.LastEvaluatedKey;
+      } while (lastEvaluatedKey);
+
+      return count;
     } catch (error) {
       throw new Error(`[internal-server-error] Failed to get followee count: ${error}`);
     }

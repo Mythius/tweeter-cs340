@@ -304,13 +304,42 @@ Resources:
 
 
   #
-  # SQS Queues  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
+  # SQS Queues
   #
 
-  #   MyQueue:
-  #     Type: AWS::SQS::Queue
-  #     Properties:
-  #       QueueName: MyQueue
+  PostStatusQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: PostStatusQueue
+      VisibilityTimeout: 70
+      MessageRetentionPeriod: 345600
+      ReceiveMessageWaitTimeSeconds: 0
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt PostStatusDLQ.Arn
+        maxReceiveCount: 3
+
+  PostStatusDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: PostStatusDLQ
+      MessageRetentionPeriod: 1209600
+
+  UpdateFeedQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: UpdateFeedQueue
+      VisibilityTimeout: 35
+      MessageRetentionPeriod: 345600
+      ReceiveMessageWaitTimeSeconds: 0
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt UpdateFeedDLQ.Arn
+        maxReceiveCount: 3
+
+  UpdateFeedDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: UpdateFeedDLQ
+      MessageRetentionPeriod: 1209600
 
 
   #
@@ -519,6 +548,10 @@ Resources:
       FunctionName: postStatusFunction
       Handler: src/model/lambda/post/PostStatusLambda.handler
       Policies: *commonPolicies
+      Environment:
+        Variables:
+          POST_STATUS_QUEUE_URL: !Ref PostStatusQueue
+          UPDATE_FEED_QUEUE_URL: !Ref UpdateFeedQueue
       Events:
         PostApi:
           Type: Api
@@ -533,21 +566,44 @@ Resources:
 
 
   #
-  # SQS Queue Lambda Functions  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
+  # SQS Queue Lambda Functions
   #
 
-  #   MyQueueFunction:
-  #     Type: AWS::Serverless::Function
-  #     Properties:
-  #       FunctionName: MyQueueFunction
-  #       Handler: <PATH TO LAMBDA HANDLER>
-  #       Policies: *commonPolicies
-  #       Events:
-  #         SQSTrigger:
-  #           Type: SQS
-  #           Properties:
-  #             Queue: !GetAtt MyQueue.Arn
-  #             Enabled: true
+  PostStatusQueueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PostStatusQueueFunction
+      Handler: src/model/lambda/queue/PostStatusQueueLambda.handler
+      Timeout: 60
+      MemorySize: 256
+      Policies: *commonPolicies
+      Environment:
+        Variables:
+          POST_STATUS_QUEUE_URL: !Ref PostStatusQueue
+          UPDATE_FEED_QUEUE_URL: !Ref UpdateFeedQueue
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PostStatusQueue.Arn
+            BatchSize: 1
+            Enabled: true
+
+  UpdateFeedQueueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: UpdateFeedQueueFunction
+      Handler: src/model/lambda/queue/UpdateFeedQueueLambda.handler
+      Timeout: 30
+      MemorySize: 128
+      Policies: *commonPolicies
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt UpdateFeedQueue.Arn
+            BatchSize: 10
+            Enabled: true
 
 
   #

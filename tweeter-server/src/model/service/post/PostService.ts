@@ -3,27 +3,24 @@ import type { StatusDto } from "tweeter-shared";
 import { IDAOFactory } from "../../dao/interface/IDAOFactory";
 import { DynamoDAOFactory } from "../../dao/factory/DynamoDAOFactory";
 import { IStatusDAO } from "../../dao/interface/IStatusDAO";
-import { IFeedDAO } from "../../dao/interface/IFeedDAO";
-import { IFollowDAO } from "../../dao/interface/IFollowDAO";
 import { AuthorizationService } from "../auth/AuthorizationService";
+import { SQSService } from "../queue/SQSService";
 
 export class PostService {
     private statusDAO: IStatusDAO;
-    private feedDAO: IFeedDAO;
-    private followDAO: IFollowDAO;
     private authService: AuthorizationService;
+    private sqsService: SQSService;
 
     constructor(daoFactory?: IDAOFactory) {
         const factory = daoFactory || DynamoDAOFactory.getInstance();
         this.statusDAO = factory.createStatusDAO();
-        this.feedDAO = factory.createFeedDAO();
-        this.followDAO = factory.createFollowDAO();
         this.authService = new AuthorizationService(factory);
+        this.sqsService = new SQSService();
     }
 
     public async postStatus(token: string, newStatus: StatusDto): Promise<void> {
         // Validate token
-        await this.authService.validateToken(token);
+        const userAlias = await this.authService.validateToken(token);
 
         // Convert DTO to domain object
         const status = Status.fromDto(newStatus);
@@ -34,26 +31,9 @@ export class PostService {
         // Save to Status table (user's story)
         await this.statusDAO.create(status);
 
-        // Add to all followers' feeds
-        const batchSize = 25;
-        let lastFollowerAlias: string | undefined = undefined;
-        let hasMore = true;
-
-        while (hasMore) {
-            const [followers, nextLastAlias] = await this.followDAO.getFollowers(
-                status.user.alias,
-                batchSize,
-                lastFollowerAlias
-            );
-
-            // Add status to each follower's feed
-            const feedPromises = followers.map(follower =>
-                this.feedDAO.addToFeed(follower.alias, status)
-            );
-            await Promise.all(feedPromises);
-
-            lastFollowerAlias = nextLastAlias || undefined;
-            hasMore = nextLastAlias !== null;
-        }
+        // Queue for asynchronous fan-out to followers' feeds
+        // This returns immediately, allowing user to see success in < 1 second
+        // Feeds will be updated asynchronously within 120 seconds
+        await this.sqsService.sendToPostStatusQueue(newStatus, userAlias);
     }
 }
